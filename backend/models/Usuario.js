@@ -28,7 +28,7 @@ const usuarioSchema = mongoose.Schema(
         },
     },
     {
-        timestamps: false,
+        timestamps: true,
     }
 )
 
@@ -41,7 +41,9 @@ usuarioSchema.pre('save', async function(next){
 })
 
 usuarioSchema.methods.comprobarPassword = async function (passwordFormulario) {
-    return await bcrypt.compare(passwordFormulario, this.password)
+    let result = await bcrypt.compare(passwordFormulario, this.password)
+   
+    return result
 }
 
 

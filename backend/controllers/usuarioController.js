@@ -35,15 +35,14 @@ const autenticar = async (req, res) => {
         return res.status(404).send({ msg: error.message })
     }
 
-    //comprobar que la cuenta haya sido validad
+    //comprobar que la cuenta haya sido validada
     if(!usuario.confirmado){
         const error = new Error('Tu cuenta no ha sido validada')
         return res.status(403).send({ msg: error.message })
     }
 
     //comprobar que la contraseña es correcta
-    
-    if( !usuario.comprobarPassword(password) ) {
+    if( await usuario.comprobarPassword(password) === false ) {
         const error = new Error('La contraseña no es correcta')
         return res.status(404).send({ msg: error.message })
     }
@@ -95,6 +94,7 @@ const olvidePassword = async (req, res) => {
 
 const comprobarToken = async (req, res) => {
     const { token } = req.params
+    console.log(req.params)
     const existeToken = await Usuario.findOne({ token })    
     
     if(!existeToken){
@@ -104,4 +104,30 @@ const comprobarToken = async (req, res) => {
     return res.json({msg: "Token válido y el usuario existe"})
 }
 
-export {registrar, autenticar, confirmar, olvidePassword, comprobarToken}
+const nuevoPassword = async (req, res) => {
+    const { password } = req.body
+    const { token } = req.params
+    
+    const usuario = await Usuario.findOne({ token })
+
+    if(usuario) {
+        usuario.password = password
+        usuario.token = ''
+        try {
+            await usuario.save()
+            res.json({msg: 'La password fue actualizada correctamente.'})
+        } catch (error) {
+            console.log(error)
+        }
+    } else {
+        const error = new Error('Token no válido')
+        res.status(404).send({msg: error.message})
+    }
+}
+
+const perfil = async (req, res) => {
+    const { usuario } = req
+    res.json(usuario)
+}
+
+export {registrar, autenticar, confirmar, olvidePassword, comprobarToken, nuevoPassword, perfil}
