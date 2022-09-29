@@ -1,6 +1,7 @@
 import Usuario from "../models/Usuario.js"
 import generarId from "../helpers/generarId.js"
 import generarJWT from "../helpers/generarJWT.js"
+import { emailRegistro } from "../helpers/emails.js"
 
 const registrar = async (req, res) => {
 
@@ -15,9 +16,16 @@ const registrar = async (req, res) => {
     try {
         const usuario = new Usuario(req.body)
         usuario.token = generarId()
-        const usuarioAlmacenado = await usuario.save()
-        res.status(200).send({msg:"usuario creado correctamente",
-                            usuario: usuarioAlmacenado})
+        await usuario.save()
+
+        //Enviar el email de confirmacion
+        emailRegistro({
+            email: usuario.email,
+            nombre: usuario.nombre,
+            token: usuario.token
+        })
+
+        res.status(200).send({msg:"usuario creado correctamente, revisa tu email para conf tu cuenta"})
     } catch (error) {
         console.log(error)
         res.status(400).send('fallo por alguna razon la carga')
