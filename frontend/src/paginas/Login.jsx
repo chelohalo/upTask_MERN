@@ -2,6 +2,9 @@ import axios from 'axios'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Alerta from '../components/Alerta'
+import useAuth from '../hooks/useAuth'
+
+
 const Login = () => {
 
   const [alerta, setAlerta] = useState({
@@ -12,6 +15,8 @@ const Login = () => {
     email: "",
     password: ""
   })
+
+  const { setAuth } = useAuth();
 
   const handleChange = (e) => {
     setInput({
@@ -32,6 +37,8 @@ const Login = () => {
         error: false
       })
       localStorage.setItem('token', data.token)
+      setAuth(data)
+      
 
     } catch (error) {
       console.log(error.response.data.msg)

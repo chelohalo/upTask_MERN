@@ -13,12 +13,12 @@ const checkAuth = async (req, res, next) => {
             return next()
 
         } catch (error) {
-            return res.status(404).send({msg: 'Hubo un error'})
+            return res.status(404).send({msg: 'Token no válido'})
         }
     }
 
     if(!token) {
-        const error = new Error('Token no válido')
+        const error = new Error('No se envió el token')
         return res.status(401).json({msg: error.message})
     }
 
