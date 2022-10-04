@@ -31,7 +31,7 @@ const AuthProvider = ({children}) => {
                   "http://localhost:4000/api/usuarios/perfil",
                   config);
                 setAuth(data)
-                navigate('/proyectos')
+                // navigate('/proyectos')
 
             } catch (error) {
                 setAuth({})
