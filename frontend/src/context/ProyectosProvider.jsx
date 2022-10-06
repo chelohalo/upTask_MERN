@@ -7,14 +7,14 @@ const ProyectosContext = createContext();
 const ProyectosProvider = ({ children }) => {
   const navigate = useNavigate()
   const [proyectos, setProyectos] = useState([]);
-  const [alerta, setAlerta] = useState([]);
+  const [alerta, setAlerta] = useState({});
   const [proyecto, setProyecto] = useState({})
   const [cargando, setCargando] = useState(false)
   const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
-
+  const [tarea, setTarea] = useState({})
 
   useEffect(() => {
-    
+
     const obtenerProyectos = async () => {
       try {
         const token = localStorage.getItem('token')
@@ -38,7 +38,7 @@ const ProyectosProvider = ({ children }) => {
     }
 
     obtenerProyectos();
-   
+
   }, [])
 
   const mostrarAlerta = (alerta) => {
@@ -49,12 +49,12 @@ const ProyectosProvider = ({ children }) => {
   };
 
   const submitProyecto = async (proyecto) => {
-    if(proyecto.id){
+    if (proyecto.id) {
       await editarProyecto(proyecto)
 
     } else {
       await agregarProyecto(proyecto)
-      
+
     }
   }
 
@@ -118,7 +118,7 @@ const ProyectosProvider = ({ children }) => {
       console.log(error);
     }
   }
-  
+
   const eliminarProyecto = async (id) => {
     const result = window.confirm('¿Estàs seguro que deseas eliminarlo?')
     if (!result) return
@@ -134,15 +134,15 @@ const ProyectosProvider = ({ children }) => {
         }
       }
 
-      const {data} = await axios.delete(`http://localhost:4000/api/proyectos/${id}`, config)
-      
+      const { data } = await axios.delete(`http://localhost:4000/api/proyectos/${id}`, config)
+
       setProyectos(proyectos.filter(proy => proy._id !== id))
-      
+
       setAlerta({
         msg: data.msg,
         error: false
       })
-            
+
       setTimeout(() => {
         setAlerta({})
         navigate('/proyectos')
@@ -178,9 +178,11 @@ const ProyectosProvider = ({ children }) => {
 
   const handleModalTarea = () => {
     setModalFormularioTarea(!modalFormularioTarea)
+    setTarea({})
   }
 
   const submitTarea = async (tarea) => {
+    const editar = tarea.id
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -192,17 +194,59 @@ const ProyectosProvider = ({ children }) => {
         },
       };
 
-      const { data } = await axios.post(
-        `http://localhost:4000/api/tareas`,
-        tarea,
-        config
-      );
+      if (!editar) {
+        const { data } = await axios.post(
+          `http://localhost:4000/api/tareas`,
+          tarea,
+          config
+        );
 
-      console.log(data)
-      
+        const proyectoActualizado = {
+          ...proyecto,
+          tareas: [...proyecto.tareas, data]
+        }
+
+        setProyecto(proyectoActualizado)
+
+        setAlerta({
+          msg: 'La tarea se creo correctamente',
+          error: false
+        })
+      } else {
+        const { data } = await axios.put(
+          `http://localhost:4000/api/tareas/${tarea.id}`,
+          tarea,
+          config
+        );
+
+        const proyectoActualizado = {
+          ...proyecto,
+          tareas: proyecto.tareas.map(tareaState => tareaState._id === data._id ? data : tareaState)
+        }
+
+        setProyecto(proyectoActualizado)
+
+        setAlerta({
+          msg: 'La tarea se editó correctamente',
+          error: false
+        })
+      }
+      setTimeout(() => {
+        setModalFormularioTarea(false)
+        setAlerta({})
+      }, 1000);
+
+
+
     } catch (error) {
       console.log(error)
     }
+
+  }
+
+  const handleModalEditarTarea = (tarea) => {
+    setTarea(tarea)
+    setModalFormularioTarea(true)
   }
 
   return (
@@ -219,6 +263,8 @@ const ProyectosProvider = ({ children }) => {
         modalFormularioTarea,
         handleModalTarea,
         submitTarea,
+        handleModalEditarTarea,
+        tarea
       }}
     >
       {children}

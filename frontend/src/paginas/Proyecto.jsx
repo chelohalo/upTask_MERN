@@ -2,13 +2,13 @@ import { useEffect,useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import useProyectos from "../hooks/useProyectos";
 import MyModal from "../components/ModalFormularioTareas";
+import Tarea from "../components/Tarea";
 
 const Proyecto = () => {
   const { id } = useParams();
   const { obtenerProyecto, proyecto, cargando, handleModalTarea } =
     useProyectos();
 
-  const [modal, setModal] = useState(false)
 
   useEffect(() => {
     obtenerProyecto(id);
@@ -68,6 +68,15 @@ const Proyecto = () => {
         Nueva tarea
       </button>
 
+      <p className="font-bold text-xl mt-10">Tareas del proyecto</p>
+      <div className="bg-white shadow mt-10 rounded-lg">
+        {proyecto.tareas?.length ? proyecto.tareas?.map(tarea => 
+        <Tarea 
+        key={tarea._id}
+        tarea={tarea}
+        />) : 
+        <p className="text-center my-5 p-10">No hay tareas</p> }
+      </div>
       <MyModal />
     </>
   );
