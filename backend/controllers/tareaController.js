@@ -17,6 +17,8 @@ const agregarTarea = async (req, res) => {
     
     try {
         const nuevaTarea = await Tarea.create(tarea)
+        proyecto.tareas.push(nuevaTarea._id)
+        await proyecto.save()
         res.json(nuevaTarea)
     } catch (error) {
         console.log(error)

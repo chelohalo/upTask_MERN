@@ -10,14 +10,20 @@ const ProyectosProvider = ({ children }) => {
   const [alerta, setAlerta] = useState([]);
   const [proyecto, setProyecto] = useState({})
   const [cargando, setCargando] = useState(false)
+  const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
+
 
   useEffect(() => {
+    
     const obtenerProyectos = async () => {
       try {
         const token = localStorage.getItem('token')
+        console.log(token)
+
         if (!token) {
           return
         }
+
         const config = {
           headers: {
             'Content-Type': 'application/json',
@@ -30,8 +36,9 @@ const ProyectosProvider = ({ children }) => {
         console.log(error)
       }
     }
-    obtenerProyectos()
 
+    obtenerProyectos();
+   
   }, [])
 
   const mostrarAlerta = (alerta) => {
@@ -169,6 +176,35 @@ const ProyectosProvider = ({ children }) => {
     }
   }
 
+  const handleModalTarea = () => {
+    setModalFormularioTarea(!modalFormularioTarea)
+  }
+
+  const submitTarea = async (tarea) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await axios.post(
+        `http://localhost:4000/api/tareas`,
+        tarea,
+        config
+      );
+
+      console.log(data)
+      
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <ProyectosContext.Provider
       value={{
@@ -179,7 +215,10 @@ const ProyectosProvider = ({ children }) => {
         obtenerProyecto,
         proyecto,
         cargando,
-        eliminarProyecto
+        eliminarProyecto,
+        modalFormularioTarea,
+        handleModalTarea,
+        submitTarea,
       }}
     >
       {children}

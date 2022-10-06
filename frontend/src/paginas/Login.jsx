@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Alerta from '../components/Alerta'
 import useAuth from '../hooks/useAuth'
 
@@ -17,6 +17,8 @@ const Login = () => {
   })
 
   const { setAuth } = useAuth();
+
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setInput({
@@ -36,9 +38,10 @@ const Login = () => {
         msg: "",
         error: false
       })
+
       localStorage.setItem('token', data.token)
       setAuth(data)
-      
+      navigate('/proyectos')
 
     } catch (error) {
       console.log(error.response.data.msg)
