@@ -72,7 +72,6 @@ const Proyecto = () => {
 
       <p className="font-bold text-xl mt-10">Tareas del proyecto</p>
 
-
       <div className="flex justify-center">
         <div className="w-full md:w-1/3 lg:w-1/4">
           {alerta.msg && <Alerta alerta={alerta} />}
@@ -80,15 +79,22 @@ const Proyecto = () => {
       </div>
 
       <div className="bg-white shadow mt-10 rounded-lg">
-        {proyecto.tareas?.length ? proyecto.tareas?.map(tarea => 
-        <Tarea 
-        key={tarea._id}
-        tarea={tarea}
-        />) : 
-        <p className="text-center my-5 p-10">No hay tareas</p> }
+        {proyecto.tareas?.length ? (
+          proyecto.tareas?.map((tarea) => (
+            <Tarea key={tarea._id} tarea={tarea} />
+          ))
+        ) : (
+          <p className="text-center my-5 p-10">No hay tareas</p>
+        )}
       </div>
 
-      
+      <div className="flex items-center justify-between mt-10">
+        <p className="font-bold text-xl">Colaboradores</p>
+        <Link
+        className="text-gray-400 uppercase font-bold hover:text-black" 
+        to={`/proyectos/nuevo-colaborador/${proyecto._id}`}>Añadir</Link>
+      </div>
+
 
       <MyModal />
       <ModalEliminarTarea />

@@ -13,13 +13,13 @@ const ProyectosProvider = ({ children }) => {
   const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
   const [tarea, setTarea] = useState({})
   const [modalEliminarTarea, setModalEliminarTarea] = useState(false)
+  const [colaborador, setColaborador] = useState({})
 
   useEffect(() => {
 
     const obtenerProyectos = async () => {
       try {
         const token = localStorage.getItem('token')
-        console.log(token)
 
         if (!token) {
           return
@@ -293,9 +293,64 @@ const ProyectosProvider = ({ children }) => {
       setModalEliminarTarea(!modalEliminarTarea)
       setTarea({})
     }
-
-
   }
+
+  const submitColaborador = async (email) => {
+    setCargando(true)
+    const token = localStorage.getItem('token')
+    
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+
+    try {
+      const { data } = await axios.post('http://localhost:4000/api/proyectos/colaboradores', {email}, config)    
+      
+      setColaborador(data)
+      setAlerta({})
+    } catch (error) {
+      mostrarAlerta({
+        msg: error.response.data.msg,
+        error: true 
+      })
+      setColaborador({})
+    } finally {
+      setCargando(false)
+    }  
+  }
+
+  const agregarColaborador = async (email) => {
+    const token = localStorage.getItem("token");
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.post(
+        `http://localhost:4000/api/proyectos/colaboradores/${proyecto._id}`,
+        email,
+        config
+      );
+      mostrarAlerta({
+        msg: data.msg,
+        error: false
+      })
+
+    } catch (error) {
+      
+      mostrarAlerta({
+        msg: error.response.data.msg,
+        error: true
+      });
+    }
+  } 
 
   return (
     <ProyectosContext.Provider
@@ -315,7 +370,10 @@ const ProyectosProvider = ({ children }) => {
         tarea,
         handleModalEliminarTarea,
         modalEliminarTarea,
-        eliminarTarea
+        eliminarTarea,
+        submitColaborador,
+        colaborador,
+        agregarColaborador
       }}
     >
       {children}

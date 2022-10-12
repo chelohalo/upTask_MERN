@@ -22,8 +22,7 @@ const AuthProvider = ({children}) => {
             const config = {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `
-                    en}`
+                    Authorization: `Bearer ${token}`
                 }
             }
 
