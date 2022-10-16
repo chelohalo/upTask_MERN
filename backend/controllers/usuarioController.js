@@ -54,6 +54,7 @@ const autenticar = async (req, res) => {
         const error = new Error('La contraseña no es correcta')
         return res.status(404).send({ msg: error.message })
     }
+    
     res.json({
         _id: usuario._id,
         nombre: usuario.nombre,

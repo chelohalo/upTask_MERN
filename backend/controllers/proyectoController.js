@@ -3,7 +3,13 @@ import Tarea from "../models/Tarea.js"
 import Usuario from "../models/Usuario.js"
 
 const obtenerProyectos = async (req, res) => {
-    const proyectos = await Proyecto.find().where('creador').equals(req.usuario).select('-tareas')
+    const proyectos = await Proyecto.find({
+        '$or': [
+            {'colaboradores': { $in: req.usuario}},
+            {'creador': { $in: req.usuario}},
+        ],
+    })
+    .select('-tareas')
 
     res.json(proyectos)
 }
@@ -24,7 +30,7 @@ const obtenerProyecto = async (req, res) => {
     let proyecto
 
     try {
-        proyecto = await Proyecto.findById(id).populate('tareas')
+        proyecto = await Proyecto.findById(id).populate('tareas').populate('colaboradores', 'nombre email')
     } catch (error) {
         console.log(error)
         const errorM = new Error("Proyecto no encontrado")
@@ -35,8 +41,10 @@ const obtenerProyecto = async (req, res) => {
         const error = new Error("Proyecto no encontrado")
         return res.status(404).send({ msg: error.message })
     }
-
-    if (req.usuario.id.toString() !== proyecto.creador.toString()) {
+    //creador                    //false                                                         true
+    //colaborador                    //true                                                         false
+    //ninguno                    //true                                                         true
+    if (req.usuario.id.toString() !== proyecto.creador.toString() && !proyecto.colaboradores.some( proy => proy._id.toString() === req.usuario.id.toString())) {
         const error = new Error('Solicite permiso al propietario para acceder')
         return res.status(401).send({ msg: error.message })
     }
@@ -175,8 +183,26 @@ const agregarColaborador = async (req, res) => {
     res.json({msg: 'Colaborador agregado correctamente'})
 
 }
-const eliminarColaborador = async (req, res) => {
 
+const eliminarColaborador = async (req, res) => {
+    const { id } = req.params
+    const proyecto = await Proyecto.findById(id)
+
+    if(!proyecto) {
+        const error = new Error('Proyecto no encontrado')
+        return res.status(404).json({msg: error.message})
+    }
+
+    if(proyecto.creador.toString() !== req.usuario._id.toString()) {
+        const error = new Error("No tiene permisos para eliminar colaboradores. Solicitelos.");
+        return res.status(404).json({ msg: error.message });
+    }
+
+    // Esta todo bien, podemos eliminar al colaborador
+    proyecto.colaboradores.pull(req.body.id)
+    await proyecto.save()
+    
+    return res.json({msg: 'Colaborador eliminado correctamente'})
 }
 
 

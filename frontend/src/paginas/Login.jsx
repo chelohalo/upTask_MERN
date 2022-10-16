@@ -34,6 +34,7 @@ const Login = () => {
         email: input.email,
         password: input.password
       })
+      console.log('datos de logueo', data)
       setAlerta({
         msg: "",
         error: false
